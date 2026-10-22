@@ -1,5 +1,6 @@
 ---
 import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import { HeaderAuth } from "../components/HeaderAuth";
 import "../styles/app.css";
 
 interface Props {
@@ -27,6 +28,10 @@ const current = (path: string) =>
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" />
+		<!-- Before first paint: pick the header's placeholder (see src/lib/session.ts). -->
+		<script is:inline>
+			document.documentElement.dataset.auth = document.cookie.split("; ").includes("aula_signed_in=1") ? "in" : "out";
+		</script>
 	</head>
 	<body class="flex min-h-svh flex-col bg-background text-foreground antialiased">
 		<header class="border-b">
@@ -38,7 +43,9 @@ const current = (path: string) =>
 				<nav class="flex items-center gap-4">
 					<!-- Below sm the logo already links home; this keeps the header within 320 px. -->
 					<a href="/" class={`${navLink} hidden sm:inline`} aria-current={current("/")}>Profesores</a>
+					<a href="/mis-clases" class={navLink} aria-current={current("/mis-clases")}>Mis clases</a>
 				</nav>
+				<HeaderAuth client:load />
 			</div>
 		</header>
 		<!-- A flex column filling the viewport, so a page can center itself with my-auto. -->

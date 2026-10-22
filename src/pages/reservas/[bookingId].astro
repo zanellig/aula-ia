@@ -1,0 +1,14 @@
+---
+import { BookingDetail } from "../../components/BookingDetail";
+import Layout from "../../layouts/Layout.astro";
+import { PUBLIC_CACHE } from "../../lib/server";
+
+// A shell that is the same for everyone: the booking loads in the browser,
+// for its owner only.
+export const prerender = false;
+Astro.response.headers.set("Cache-Control", PUBLIC_CACHE);
+---
+
+<Layout title="Tu reserva · Aula IA">
+	<BookingDetail client:load bookingId={Astro.params.bookingId ?? ""} />
+</Layout>

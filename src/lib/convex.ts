@@ -6,16 +6,35 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 import { useEffect, useState } from "preact/hooks";
+import { loadSession } from "./session";
 
 let client: Promise<ConvexClient> | undefined;
 
+// The Convex JWT for the session cookie, through our auth proxy.
+async function fetchToken() {
+	const response = await fetch("/api/auth/convex/token");
+	if (!response.ok) return null;
+	const { token }: { token: string } = await response.json();
+	return token;
+}
+
 // One websocket per page, loaded after the island renders so the Convex
-// client (~19 KB gzip) never delays the first paint.
+// client (~19 KB gzip) never delays the first paint. A signed-in visitor's
+// queries wait for the token, so they never run as anonymous first.
 export function getConvex() {
-	client ??= import("convex/browser").then(
-		({ ConvexClient }) => new ConvexClient(CONVEX_URL),
+	client ??= Promise.all([import("convex/browser"), loadSession()]).then(
+		([{ ConvexClient }, user]) => {
+			const convex = new ConvexClient(CONVEX_URL, { expectAuth: !!user });
+			if (user) convex.setAuth(fetchToken);
+			return convex;
+		},
 	);
 	return client;
+}
+
+/** Stops sending the ended session's token; queries re-run as anonymous. */
+export function clearConvexAuth() {
+	void client?.then((convex) => convex.client.clearAuth());
 }
 
 type QueryState<T> = { value?: T; error?: Error };

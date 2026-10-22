@@ -11,7 +11,8 @@
 		"typecheck": "astro check",
 		"build": "astro check && astro build",
 		"format": "biome check --write .",
-		"lint": "astro check && biome check ."
+		"lint": "astro check && biome check .",
+		"e2e": "playwright test"
 	},
 	"dependencies": {
 		"@astrojs/preact": "~6.0.6",
@@ -29,6 +30,7 @@
 		"@astrojs/check": "~0.9.10",
 		"@biomejs/biome": "2.5.15",
 		"@edge-runtime/vm": "~5.0.0",
+		"@playwright/test": "1.63.0",
 		"@tailwindcss/vite": "~4.3.3",
 		"convex-test": "~0.0.62",
 		"tailwindcss": "~4.3.3",

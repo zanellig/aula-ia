@@ -28,3 +28,7 @@ pnpm-debug.log*
 .vercel
 .convex
 .worktrees/
+
+# playwright
+/test-results/
+/playwright-report/
