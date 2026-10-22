@@ -1,0 +1,3 @@
+# Local env files point at the dev deployment; Vercel has its own env.
+.env
+.env*.local
