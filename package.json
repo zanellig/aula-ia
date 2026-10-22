@@ -22,6 +22,7 @@
 		"astro": "~7.3.8",
 		"better-auth": "~1.6.33",
 		"convex": "~1.46.0",
+		"lucide-preact": "~1.57.0",
 		"preact": "~10.29.8"
 	},
 	"devDependencies": {

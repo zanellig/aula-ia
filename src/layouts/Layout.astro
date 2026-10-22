@@ -6,6 +6,11 @@ interface Props {
 	title: string;
 }
 const { title } = Astro.props;
+
+const navLink =
+	"text-sm whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground";
+const current = (path: string) =>
+	Astro.url.pathname === path ? "page" : undefined;
 ---
 
 <!doctype html>
@@ -30,6 +35,10 @@ const { title } = Astro.props;
 					<img src="/favicon.svg" alt="" class="size-6" />
 					Aula IA
 				</a>
+				<nav class="flex items-center gap-4">
+					<!-- Below sm the logo already links home; this keeps the header within 320 px. -->
+					<a href="/" class={`${navLink} hidden sm:inline`} aria-current={current("/")}>Profesores</a>
+				</nav>
 			</div>
 		</header>
 		<!-- A flex column filling the viewport, so a page can center itself with my-auto. -->
