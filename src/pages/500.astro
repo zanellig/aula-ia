@@ -1,0 +1,11 @@
+---
+import Fallback from "../components/Fallback.astro";
+import { buttonClass } from "../components/ui";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Algo salió mal · Aula IA">
+	<Fallback title="Algo salió mal" message="Ocurrió un error inesperado. Probá de nuevo.">
+		<a href={Astro.url.pathname + Astro.url.search} class={buttonClass()}>Reintentar</a>
+	</Fallback>
+</Layout>

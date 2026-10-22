@@ -1,0 +1,18 @@
+---
+import { buttonClass } from "./ui";
+
+interface Props {
+	title: string;
+	message: string;
+}
+const { title, message } = Astro.props;
+---
+
+<div class="flex flex-col items-center gap-3 py-16 text-center">
+	<h1 class="text-xl font-semibold">{title}</h1>
+	<p class="text-sm text-muted-foreground">{message}</p>
+	<div class="flex gap-2">
+		<slot />
+		<a href="/" class={buttonClass({ variant: "outline" })}>Ir al inicio</a>
+	</div>
+</div>

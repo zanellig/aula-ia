@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+.env.local
+
+# vercel / convex / worktrees
+.vercel
+.convex
+.worktrees/
+
+# playwright
+/test-results/
+/playwright-report/

@@ -1,0 +1,66 @@
+---
+import { ChevronLeft } from "lucide-preact";
+import { api } from "../../../convex/_generated/api";
+import { SlotGrid } from "../../components/SlotGrid";
+import { TeacherAvatar } from "../../components/TeacherAvatar";
+import { Badge, buttonClass } from "../../components/ui";
+import Layout from "../../layouts/Layout.astro";
+import { convexHttp, PUBLIC_CACHE } from "../../lib/server";
+
+export const prerender = false;
+
+const data = await convexHttp().query(api.teachers.getBySlug, {
+	slug: Astro.params.slug ?? "",
+});
+Astro.response.headers.set("Cache-Control", PUBLIC_CACHE);
+if (!data) Astro.response.status = 404;
+---
+
+<Layout title={data ? `${data.teacher.name} · Aula IA` : "Aula IA"}>
+	{
+		data ? (
+			<div>
+				<a href="/" class={buttonClass({ variant: "ghost", size: "sm" }, "-ml-2.5")}>
+					<ChevronLeft data-icon="inline-start" aria-hidden="true" />
+					Todos los profesores
+				</a>
+
+				<div class="mt-6 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-14">
+					<section aria-labelledby="perfil" class="lg:sticky lg:top-8 lg:self-start">
+						<TeacherAvatar name={data.teacher.name} photoUrl={data.teacher.photoUrl} class="size-24" />
+						<h1 id="perfil" class="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
+							{data.teacher.name}
+						</h1>
+						<p class="mt-1 text-muted-foreground">{data.teacher.headline}</p>
+						<ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Especialidades">
+							{data.teacher.specialties.map((specialty) => (
+								<li>
+									<Badge variant="outline">{specialty}</Badge>
+								</li>
+							))}
+						</ul>
+						<p class="mt-6 max-w-prose leading-relaxed text-pretty">{data.teacher.bio}</p>
+					</section>
+
+					<section aria-labelledby="horarios">
+						<h2 id="horarios" class="text-lg font-semibold">
+							Elegí un horario
+						</h2>
+						<p class="mt-1 text-sm text-muted-foreground">Cada clase dura 60 minutos.</p>
+						<SlotGrid client:load initial={data} />
+					</section>
+				</div>
+			</div>
+		) : (
+			<div class="mx-auto max-w-md py-8 text-center">
+				<h1 class="text-xl font-semibold tracking-tight">No encontramos a este profesor</h1>
+				<p class="mt-2 text-muted-foreground">
+					Puede que el enlace esté mal escrito o que el perfil ya no exista.
+				</p>
+				<a href="/" class={buttonClass({}, "mt-6")}>
+					Ver todos los profesores
+				</a>
+			</div>
+		)
+	}
+</Layout>

@@ -1,16 +1,100 @@
 ---
+import { CalendarClock } from "lucide-preact";
+import { api } from "../../convex/_generated/api";
+import { NextAvailable } from "../components/NextAvailable";
+import { TeacherAvatar } from "../components/TeacherAvatar";
+import { Badge } from "../components/ui";
+import Layout from "../layouts/Layout.astro";
+import { convexHttp, PUBLIC_CACHE } from "../lib/server";
+
+export const prerender = false;
+
+const teachers = await convexHttp().query(api.teachers.list, {});
+Astro.response.headers.set("Cache-Control", PUBLIC_CACHE);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Aula IA · Clases 1 a 1 de inteligencia artificial">
+	<div class="sm:py-6">
+		<section class="max-w-2xl">
+			<h1 class="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+				Clases 1 a 1 con especialistas en inteligencia artificial
+			</h1>
+			<p class="mt-4 text-base text-pretty text-muted-foreground sm:text-lg">
+				Elegí con quién aprender y reservá una clase de 60 minutos sobre lo que necesites.
+			</p>
+		</section>
+
+		<section aria-labelledby="profesores" class="mt-12">
+			<h2 id="profesores" class="text-lg font-semibold">Profesores</h2>
+
+			{
+				teachers.length === 0 ? (
+					<p class="mt-4 rounded-xl border border-dashed px-6 py-10 text-center text-muted-foreground">
+						Todavía no hay profesores cargados.
+					</p>
+				) : (
+					<ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{teachers.map((teacher) => (
+							<li class="flex">
+								<a
+									href={`/profesores/${teacher.slug}`}
+									class="group flex w-full flex-col gap-4 rounded-xl border bg-card p-5 transition-colors outline-none hover:border-foreground/25 focus-visible:ring-3 focus-visible:ring-ring/50"
+								>
+									<div class="flex items-center gap-3">
+										<TeacherAvatar name={teacher.name} photoUrl={teacher.photoUrl} class="size-14" />
+										<div class="min-w-0">
+											<h3 class="font-semibold group-hover:underline group-hover:underline-offset-4">
+												{teacher.name}
+											</h3>
+											<p class="text-sm text-muted-foreground">{teacher.headline}</p>
+										</div>
+									</div>
+
+									<ul class="flex flex-wrap gap-1.5" aria-label="Especialidades">
+										{teacher.specialties.map((specialty) => (
+											<li>
+												<Badge variant="outline">{specialty}</Badge>
+											</li>
+										))}
+									</ul>
+
+									<p class="mt-auto flex items-center gap-2 border-t pt-4 text-sm">
+										<CalendarClock class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+										<span data-next-available={teacher.slug}>
+											<NextAvailable at={teacher.nextAvailableAt} />
+										</span>
+									</p>
+								</a>
+							</li>
+						))}
+					</ul>
+				)
+			}
+		</section>
+	</div>
+</Layout>
+
+<script>
+	import { CONVEX_URL } from "astro:env/client";
+	import type { FunctionReturnType } from "convex/server";
+	import { h, render } from "preact";
+	import type { api } from "../../convex/_generated/api";
+	import { NextAvailable } from "../components/NextAvailable";
+
+	// The CDN can serve this page minutes or hours old (stale-while-revalidate),
+	// and a slot may have been booked or passed since. Ask Convex for the
+	// current next slots through its HTTP API, without loading its client.
+	type Teachers = FunctionReturnType<typeof api.teachers.list>;
+	const response = await fetch(`${CONVEX_URL}/api/query`, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ path: "teachers:list", args: {}, format: "json" }),
+	});
+	const result: { status: string; value: Teachers } = await response.json();
+	if (result.status === "success") {
+		for (const teacher of result.value) {
+			const slot = document.querySelector(`[data-next-available="${teacher.slug}"]`);
+			if (slot) render(h(NextAvailable, { at: teacher.nextAvailableAt }), slot);
+		}
+	}
+</script>
